@@ -13,38 +13,24 @@ complex<float> operator/(const complex<float>& a, int x) {
 }
 
 class fmdemod {
-private:
-	std::vector<complex<float>> arr;
 public:
+	std::vector<complex<float>> arr;
 	float demodulate() {
 		float y = arg(arr[1] * conj(arr[0])) / M_PI;
 		arr[0] = arr[1];
 		arr.pop_back();
 		return y;
 	}
-	
-	void add(complex<float> p) {
-		arr.push_back(p);
-	}
-
-	size_t getSize() {
-		return arr.size();
-	}
 };
 
 template<typename T, int K>
 class decimate {
 
-private:
-	std::vector<T> arr;
 public:
+	std::vector<T> arr;
 	decimate()
 	{
 		arr.reserve(K);
-	}
-
-	void add(T p) {
-		arr.push_back(p);
 	}
 
 	T average() {
@@ -53,14 +39,6 @@ public:
 			result += arr[i] / K;
 		}
 		return result;
-	}
-	
-	size_t getSize() {
-		return arr.size();
-	}
-
-	void clear() {
-		arr.clear();
 	}
 };
 
@@ -111,19 +89,19 @@ public:
 
 			complex<float> x((r - 127.5) / 127.5, ((im - 127.5) / 127.5));
 			x = fm.shift(x, n);
-			dec1.add(x);
-			if (dec1.getSize() == 5) {
+			dec1.arr.push_back(x);
+			if (dec1.arr.size() == 5) {
 				complex<float> avg = dec1.average();
-				demod.add(avg);
-				if (demod.getSize() == 2) {
-					dec2.add(demod.demodulate());
-					if (dec2.getSize() == 8) {
+				demod.arr.push_back(avg);
+				if (demod.arr.size() == 2) {
+					dec2.arr.push_back(demod.demodulate());
+					if (dec2.arr.size() == 8) {
 						float y = dec2.average();
 						write.write(reinterpret_cast<const char*>(&y), sizeof(y));
-						dec2.clear();
+						dec2.arr.clear();
 					}
 				}
-				dec1.clear();
+				dec1.arr.clear();
 			}
 			n++;
 		}
